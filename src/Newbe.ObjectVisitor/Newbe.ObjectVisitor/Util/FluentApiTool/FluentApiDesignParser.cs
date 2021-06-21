@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -116,21 +116,34 @@ namespace Newbe.ObjectVisitor
             var parameterBlock = new List<string>();
             do
             {
+                // 读取一行字符
                 nowLine = sr.ReadLine();
                 if (nowLine != null && !string.IsNullOrEmpty(nowLine))
                 {
+                    // markdown中mermaid的结构如下（内容为状态流转）：
+                    // ```mermaid
+                    // 内容
+                    // ```
+                    // 遇到```mermaid则为开始
                     if (nowLine.Contains("```mermaid"))
                     {
                         stateBlock.Add(nowLine);
+                        // 遍历读取mermaid状态流转内容，并存放至stateBlock集合，直到遇到 ```停止
                         do
                         {
                             nowLine = sr.ReadLine();
                             stateBlock.Add(nowLine);
                         } while (!IsEnd(nowLine, "```"));
                     }
+                    // markdown中代码片段的结构如下（内容为声明参数）：
+                    // ```cs
+                    // 内容
+                    // ```
+                    // 遇到```cs则为开始
                     else if (nowLine.Contains("```cs"))
                     {
                         parameterBlock.Add(nowLine);
+                        // 遍历读取cs声明参数内容，并存放至parameterBlock集合，直到遇到 ```停止
                         do
                         {
                             nowLine = sr.ReadLine();
@@ -140,6 +153,7 @@ namespace Newbe.ObjectVisitor
                 }
             } while (nowLine != null);
 
+            // Environment.NewLine为换行，在windows环境下Environment.NewLine == "\r\n"
             re.ParametersBlock = string.Join(Environment.NewLine, parameterBlock);
             re.StateDiagramBlock = string.Join(Environment.NewLine, stateBlock);
 
